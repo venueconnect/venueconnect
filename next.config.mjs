@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'pdjizjvsffovqjavnbhy.supabase.co' },
       { protocol: 'https', hostname: 'lfkwwyeemrvwyahtzwji.supabase.co' },
+      { protocol: 'https', hostname: 'pgjoyxhcmqcsnmhwbkgi.supabase.co' },
       { protocol: 'https', hostname: 'upload.wikimedia.org' },
       { protocol: 'https', hostname: 'i.pinimg.com' },
       { protocol: 'https', hostname: 'via.placeholder.com' },

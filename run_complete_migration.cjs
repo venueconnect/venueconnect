@@ -8,8 +8,8 @@ const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 
 // Load environment
-const SUPABASE_URL = 'https://lfkwwyeemrvwyahtzwji.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxma3d3eWVlbXJ2d3lhaHR6d2ppIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjkxMzgxMCwiZXhwIjoyMDkyNDg5ODEwfQ.BI_PsDkbd8zZicQD6AkC99f6p_uApQLo6PVwlWhUL1w';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pgjoyxhcmqcsnmhwbkgi.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnam95eGhjbXFjc25taHdia2dpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjUyMzYwOCwiZXhwIjoyMTAyMDk5NjA4fQ.MhFUgMQChMOEH0Xm4cqXbt2PMfJJP1Vq8yNXmH6TFGU';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 

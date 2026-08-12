@@ -17,6 +17,8 @@ DROP TABLE IF EXISTS public.leads CASCADE;
 DROP TABLE IF EXISTS public.venue_applications CASCADE;
 DROP TABLE IF EXISTS public.vendors CASCADE;
 DROP TABLE IF EXISTS public.venues CASCADE;
+DROP TABLE IF EXISTS public.seo_pages CASCADE;
+DROP TABLE IF EXISTS public.locations CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 
 -- 1. EXTENSIONS & TYPES
@@ -38,11 +40,34 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     created_at timestamp with time zone default now()
 );
 
--- 3. VENUES TABLE
+-- 3. LOCATIONS TABLE
+CREATE TABLE IF NOT EXISTS public.locations (
+    id uuid default gen_random_uuid() primary key,
+    city text not null,
+    city_slug text not null,
+    area text not null,
+    area_slug text not null,
+    state text default 'Gujarat',
+    created_at timestamp with time zone default now(),
+    CONSTRAINT locations_city_area_unique UNIQUE (city_slug, area_slug)
+);
+
+-- 4. SEO PAGES TABLE
+CREATE TABLE IF NOT EXISTS public.seo_pages (
+    id uuid default gen_random_uuid() primary key,
+    slug text not null unique,
+    page_type text not null,
+    city_id uuid references public.locations(id) on delete set null,
+    custom_content jsonb default '{}'::jsonb,
+    created_at timestamp with time zone default now()
+);
+
+-- 5. VENUES TABLE
 CREATE TABLE IF NOT EXISTS public.venues (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
     name text not null,
+    slug text,
     city text,
     location text,
     address text,
@@ -69,17 +94,36 @@ CREATE TABLE IF NOT EXISTS public.venues (
     operating_hours text,
     amenities text[],
     starting_price integer,
-    is_approved boolean default false,
+    is_approved boolean default true,
     is_featured boolean default false,
     is_active boolean default true,
-    description text
+    is_verified boolean default true,
+    description text,
+    room_starting_price integer,
+    dj_available boolean default false,
+    dj_price integer,
+    dj_tax integer,
+    parking_capacity integer,
+    food_served text[],
+    usps text[],
+    outside_liquor_permitted boolean default false,
+    license_required_price integer,
+    corkage_charges integer,
+    booking_policy text,
+    cancellation_policy text,
+    nearest_landmark text,
+    nearest_airport text,
+    nearest_bus_stand text,
+    policy_terms text,
+    disclaimer text
 );
 
--- 4. VENDORS TABLE
+-- 6. VENDORS TABLE
 CREATE TABLE IF NOT EXISTS public.vendors (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
     name text not null,
+    slug text,
     city text,
     location text,
     address text,
@@ -90,14 +134,15 @@ CREATE TABLE IF NOT EXISTS public.vendors (
     images text[],
     logo_url text,
     owner_id uuid references public.profiles(id) on delete set null,
-    is_approved boolean default false,
+    is_approved boolean default true,
     is_featured boolean default false,
     is_active boolean default true,
+    is_verified boolean default true,
     starting_price integer default 0,
     description text
 );
 
--- 5. VENUE APPLICATIONS TABLE
+-- 7. VENUE APPLICATIONS TABLE
 CREATE TABLE IF NOT EXISTS public.venue_applications (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
@@ -134,7 +179,7 @@ CREATE TABLE IF NOT EXISTS public.venue_applications (
     vendor_category text
 );
 
--- 6. LEADS TABLE
+-- 8. LEADS TABLE
 CREATE TABLE IF NOT EXISTS public.leads (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
@@ -149,7 +194,7 @@ CREATE TABLE IF NOT EXISTS public.leads (
     status text default 'new' CHECK (status IN ('new', 'contacted', 'closed'))
 );
 
--- 7. VENUE LEADS TABLE
+-- 9. VENUE LEADS TABLE
 CREATE TABLE IF NOT EXISTS public.venue_leads (
     id uuid not null default gen_random_uuid() primary key,
     created_at timestamp with time zone not null default now(),
@@ -163,7 +208,7 @@ CREATE TABLE IF NOT EXISTS public.venue_leads (
     status text default 'new'
 );
 
--- 8. USER FAVORITES TABLE
+-- 10. USER FAVORITES TABLE
 CREATE TABLE IF NOT EXISTS public.user_favorites (
     id uuid not null default gen_random_uuid() primary key,
     user_id uuid references public.profiles(id) on delete cascade,
@@ -173,8 +218,10 @@ CREATE TABLE IF NOT EXISTS public.user_favorites (
     UNIQUE(user_id, listing_id)
 );
 
--- 9. ROW LEVEL SECURITY (RLS)
+-- 11. ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.seo_pages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.venues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.vendors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.venue_applications ENABLE ROW LEVEL SECURITY;
@@ -184,6 +231,8 @@ ALTER TABLE public.user_favorites ENABLE ROW LEVEL SECURITY;
 
 -- Select Policies (Public Access)
 CREATE POLICY "Public Read Access Profiles" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Public Read Access Locations" ON public.locations FOR SELECT USING (true);
+CREATE POLICY "Public Read Access SEO Pages" ON public.seo_pages FOR SELECT USING (true);
 CREATE POLICY "Public Read Access Venues" ON public.venues FOR SELECT USING (true);
 CREATE POLICY "Public Read Access Vendors" ON public.vendors FOR SELECT USING (true);
 
