@@ -21,7 +21,7 @@ export default function ListVenuePage() {
             const { data: { user } } = await supabase.auth.getUser() as any;
             if (!user) {
                 toast.error("Please login first to list your business");
-                router.push('/login?next=/list-venue');
+                router.push('/register?next=/list-venue');
             } else {
                 setAuthLoading(false);
             }

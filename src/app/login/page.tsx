@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -16,6 +16,17 @@ function LoginContent() {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const safeRedirect = nextParam.startsWith("/") ? nextParam : "/";
+                router.push(safeRedirect);
+            }
+        };
+        checkUser();
+    }, [router, supabase.auth, nextParam]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();

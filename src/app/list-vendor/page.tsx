@@ -21,7 +21,7 @@ export default function ListVendorPage() {
             const { data: { user } } = await supabase.auth.getUser() as any;
             if (!user) {
                 toast.error("Please login first to register as a vendor");
-                router.push('/login?next=/list-vendor');
+                router.push('/register?next=/list-vendor');
             } else {
                 setAuthLoading(false);
             }
