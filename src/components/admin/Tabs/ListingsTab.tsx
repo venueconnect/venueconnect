@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { 
   Building2, 
@@ -34,6 +35,10 @@ import {
 import { SafeImage } from "@/components/ui/SafeImage";
 
 const ITEMS_PER_PAGE = 20;
+
+const slugifyCity = (city?: string | null): string => {
+    return (city || "").trim().toLowerCase().replace(/\s+/g, "-");
+};
 
 export default function ListingsTab() {
   const [listings, setListings] = useState<any[]>([]);
@@ -296,7 +301,17 @@ export default function ListingsTab() {
                                 <SafeImage src={item.image || item.images?.[0] || ''} alt={item.name} fill className="object-cover" />
                             </div>
                             <div>
-                                <p className="font-bold text-slate-900 group-hover:text-primary transition-colors leading-tight">{item.name}</p>
+                                {item.slug && item.city ? (
+                                    <Link 
+                                        href={`/${item.type}s/${slugifyCity(item.city)}/${item.slug}`}
+                                        target="_blank"
+                                        className="font-bold text-slate-900 hover:text-primary hover:underline transition-colors leading-tight block"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                ) : (
+                                    <p className="font-bold text-slate-900 group-hover:text-primary transition-colors leading-tight">{item.name}</p>
+                                )}
                                 <p className="text-xs text-slate-400 font-medium mt-1">ID: ...{item.id.slice(-6)}</p>
                             </div>
                         </div>
