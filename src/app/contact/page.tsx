@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
@@ -7,9 +9,55 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
 
 export default function ContactPage() {
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [subject, setSubject] = useState("");
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            const url = process.env.NEXT_PUBLIC_GOOGLE_SHEETS_URL;
+            if (!url) {
+                throw new Error("Submission service is not configured.");
+            }
+
+            await fetch(url, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    type: "General Contact Inquiry",
+                    name: `${firstName} ${lastName}`.trim(),
+                    email,
+                    subject,
+                    message,
+                    timestamp: new Date().toISOString()
+                })
+            });
+
+            toast.success("Thank you! Your message has been sent successfully.");
+            setFirstName("");
+            setLastName("");
+            setEmail("");
+            setSubject("");
+            setMessage("");
+        } catch (err: any) {
+            toast.error("Failed to send message: " + (err.message || "Unknown error"));
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <PageHeader
@@ -35,7 +83,7 @@ export default function ContactPage() {
                                     </div>
                                     Call Us
                                 </div>
-                                <p className="text-muted-foreground pl-13">+91 9601015102</p>
+                                <p className="text-muted-foreground pl-13">+91 9586500686</p>
                                 <p className="text-muted-foreground text-sm pl-13">Mon - Sat, 9am - 7pm</p>
                             </div>
 
@@ -67,36 +115,80 @@ export default function ContactPage() {
 
                     {/* Contact Form */}
                     <div className="bg-white p-8 rounded-2xl border border-border shadow-sm">
-                        <h3 className="text-2xl font-display font-medium mb-6">Send a Message</h3>
-                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                        <h3 className="text-2xl font-display font-semibold mb-6">Send a Message</h3>
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="firstName">First Name</Label>
-                                    <Input id="firstName" placeholder="John" />
+                                    <Input 
+                                        id="firstName" 
+                                        placeholder="John" 
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        required
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="lastName">Last Name</Label>
-                                    <Input id="lastName" placeholder="Doe" />
+                                    <Input 
+                                        id="lastName" 
+                                        placeholder="Doe" 
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        required
+                                    />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="john@example.com" />
+                                <Input 
+                                    id="email" 
+                                    type="email" 
+                                    placeholder="john@example.com" 
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="subject">Subject</Label>
-                                <Input id="subject" placeholder="How can we help?" />
+                                <Input 
+                                    id="subject" 
+                                    placeholder="How can we help?" 
+                                    value={subject}
+                                    onChange={(e) => setSubject(e.target.value)}
+                                    required
+                                />
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="message">Message</Label>
-                                <Textarea id="message" placeholder="Include as much detail as possible..." rows={5} className="resize-none" />
+                                <Textarea 
+                                    id="message" 
+                                    placeholder="Include as much detail as possible..." 
+                                    rows={5} 
+                                    className="resize-none" 
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    required
+                                />
                             </div>
 
-                            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white font-semibold" size="lg">
-                                Send Message
+                            <Button 
+                                type="submit" 
+                                disabled={loading}
+                                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold flex items-center justify-center gap-2" 
+                                size="lg"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" /> Sending Message...
+                                    </>
+                                ) : (
+                                    "Send Message"
+                                )}
                             </Button>
                         </form>
                     </div>

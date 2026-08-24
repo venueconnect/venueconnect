@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -13,10 +13,21 @@ import MultiImageUpload from "@/components/MultiImageUpload";
 
 export default function ListVenuePage() {
     const router = useRouter();
-    const [step, setStep] = useState(1);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [authLoading, setAuthLoading] = useState(true);
     const supabase = createClient();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser() as any;
+            if (!user) {
+                toast.error("Please login first to list your business");
+                router.push('/login?next=/list-venue');
+            } else {
+                setAuthLoading(false);
+            }
+        };
+        checkUser();
+    }, [router, supabase.auth]);
 
     const [formData, setFormData] = useState({
         // Step 1: Basic info
@@ -68,8 +79,13 @@ export default function ListVenuePage() {
         images: [] as string[]
     });
 
+    const [step, setStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
     const generateAutoSummary = (data: typeof formData) => {
-        return `${data.businessName} is a premier ${data.venueType} located in ${data.area}, ${data.city}. With a capacity ranging from ${data.minCapacity} to ${data.maxCapacity} guests, it's perfect for ${data.occasions.slice(0, 3).join(', ')}. We offer ${data.foodType === 'both' ? 'both Veg and Non-Veg' : data.foodType === 'veg' ? 'Veg-only' : 'Non-Veg'} catering starting at ₹${data.vegPrice || data.nonVegPrice}. Facilities include ${data.amenities.slice(0, 5).join(', ')}. Our policy follows ${data.cateringPolicy}.`;
+        const pricingText = (data.vegPrice || data.nonVegPrice) ? ` starting at ₹${data.vegPrice || data.nonVegPrice}` : '';
+        return `${data.businessName} is a premier ${data.venueType} located in ${data.area}, ${data.city}. With a capacity ranging from ${data.minCapacity} to ${data.maxCapacity} guests, it's perfect for ${data.occasions.slice(0, 3).join(', ')}. We offer ${data.foodType === 'both' ? 'both Veg and Non-Veg' : data.foodType === 'veg' ? 'Veg-only' : 'Non-Veg'} catering${pricingText}. Facilities include ${data.amenities.slice(0, 5).join(', ')}. Our policy follows ${data.cateringPolicy}.`;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -191,6 +207,14 @@ export default function ListVenuePage() {
             setIsSubmitting(false);
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     const inputCls = "w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 bg-white transition-all placeholder:text-gray-400";
     const labelCls = "block text-sm font-semibold text-slate-700 mb-1.5";
@@ -324,6 +348,7 @@ export default function ListVenuePage() {
                                                         <option value="Farmhouse">Farmhouse</option>
                                                         <option value="Convention Center">Convention Center</option>
                                                         <option value="Rooftop">Rooftop</option>
+                                                        <option value="Cafe">Cafe</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -425,14 +450,14 @@ export default function ListVenuePage() {
                                                 </div>
                                                 {(formData.foodType === 'veg' || formData.foodType === 'both') && (
                                                     <div>
-                                                        <label className={labelCls}>Veg Plate Price *</label>
-                                                        <input type="number" name="vegPrice" value={formData.vegPrice} onChange={handleChange} placeholder="₹ Per Plate" className={inputCls} required />
+                                                        <label className={labelCls}>Veg Plate Price (Optional)</label>
+                                                        <input type="number" name="vegPrice" value={formData.vegPrice} onChange={handleChange} placeholder="₹ Per Plate" className={inputCls} />
                                                     </div>
                                                 )}
                                                 {(formData.foodType === 'non-veg' || formData.foodType === 'both') && (
                                                     <div>
-                                                        <label className={labelCls}>Non-Veg Plate Price *</label>
-                                                        <input type="number" name="nonVegPrice" value={formData.nonVegPrice} onChange={handleChange} placeholder="₹ Per Plate" className={inputCls} required />
+                                                        <label className={labelCls}>Non-Veg Plate Price (Optional)</label>
+                                                        <input type="number" name="nonVegPrice" value={formData.nonVegPrice} onChange={handleChange} placeholder="₹ Per Plate" className={inputCls} />
                                                     </div>
                                                 )}
                                             </div>

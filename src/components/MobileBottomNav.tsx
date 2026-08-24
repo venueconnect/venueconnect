@@ -74,7 +74,7 @@ const MobileBottomNav = () => {
 
         {/* WhatsApp */}
         <a
-          href="https://wa.me/919601015102"
+          href="https://wa.me/919586500686"
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center gap-0.5 flex-1 py-2 text-green-500"

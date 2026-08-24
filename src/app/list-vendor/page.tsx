@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -13,10 +13,21 @@ import MultiImageUpload from "@/components/MultiImageUpload";
 
 export default function ListVendorPage() {
     const router = useRouter();
-    const [step, setStep] = useState(1);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [authLoading, setAuthLoading] = useState(true);
     const supabase = createClient();
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser() as any;
+            if (!user) {
+                toast.error("Please login first to register as a vendor");
+                router.push('/login?next=/list-vendor');
+            } else {
+                setAuthLoading(false);
+            }
+        };
+        checkUser();
+    }, [router, supabase.auth]);
 
     const [formData, setFormData] = useState({
         // Step 1: Basic info
@@ -32,6 +43,10 @@ export default function ListVendorPage() {
         description: "",
         images: [] as string[]
     });
+
+    const [step, setStep] = useState(1);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -125,6 +140,14 @@ export default function ListVendorPage() {
         "Sounds LED Lights", "Transport Services", "Venues", 
         "Videographers", "Wedding Cakes", "Wedding Artists"
     ];
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col">

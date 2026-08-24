@@ -244,7 +244,7 @@ export default function VendorEnquiryForm({ vendor }: VendorEnquiryFormProps) {
                             <h4 className="text-sm font-black text-slate-900">Arrange a call</h4>
                         </div>
                     </div>
-                    <a href={`tel:${vendor.phone_number || '+919104841218'}`} className="text-xs font-black text-primary uppercase tracking-widest">Call Now</a>
+                    <a href={`tel:${vendor.phone_number || '+919586500686'}`} className="text-xs font-black text-primary uppercase tracking-widest">Call Now</a>
                 </div>
             </div>
         </div>

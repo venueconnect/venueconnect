@@ -14,4 +14,4 @@ Disallow: /register
 Disallow: /profile
 
 # Sitemap location
-Sitemap: https://venueconnect.in/sitemap.xml
+Sitemap: https://venueconnect.in/sitemap_index.xml

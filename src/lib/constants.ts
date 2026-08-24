@@ -24,7 +24,7 @@ export const OCCASIONS = {
 
 export const VENUE_TYPES = [
   'Banquet Halls', 'Farmhouses', 'Party Plots', 'Hotels', 'Resorts', 'Restaurants',
-  'Convention Centers', 'Clubs', 'Rooftop Venues', 'Garden Venues', 'Heritage Venues', 'Luxury Venues'
+  'Convention Centers', 'Clubs', 'Rooftop Venues', 'Garden Venues', 'Heritage Venues', 'Luxury Venues', 'Cafes'
 ];
 
 export const VENDOR_TYPES = [

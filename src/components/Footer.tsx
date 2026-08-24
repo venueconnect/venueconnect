@@ -84,8 +84,13 @@ const Footer = () => {
         {/* Socials */}
         <div className="flex items-center gap-4 mb-5">
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Follow</span>
-          {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
-            <a key={i} href="#" className="text-slate-400 hover:text-white transition-colors">
+          {[
+            { Icon: Facebook, href: "https://www.facebook.com/venueconnect.in/" },
+            { Icon: Instagram, href: "https://www.instagram.com/venueconnect.in/" },
+            { Icon: Twitter, href: "#" },
+            { Icon: Linkedin, href: "#" }
+          ].map(({ Icon, href }, i) => (
+            <a key={i} href={href} target={href !== "#" ? "_blank" : undefined} rel={href !== "#" ? "noopener noreferrer" : undefined} className="text-slate-400 hover:text-white transition-colors">
               <Icon size={17} />
             </a>
           ))}
@@ -93,8 +98,8 @@ const Footer = () => {
 
         {/* Contact */}
         <div className="flex flex-col gap-1.5 mb-4">
-          <a href="tel:+919601015102" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
-            <Phone size={13} className="text-white fill-white" />+91 9601015102
+          <a href="tel:+919586500686" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
+            <Phone size={13} className="text-white fill-white" />+91 9586500686
           </a>
           <a href="mailto:info@venueconnect.in" className="flex items-center gap-2 text-xs font-bold hover:text-primary transition-colors">
             <Mail size={13} className="text-white fill-white" />info@venueconnect.in
@@ -217,8 +222,8 @@ const Footer = () => {
             <div className="space-y-4">
               <h4 className="text-lg font-black mb-4 tracking-tight">Contact Info</h4>
               <div className="flex flex-col gap-3">
-                <a href="tel:+919601015102" className="flex items-center gap-2 text-base font-bold hover:text-primary transition-colors">
-                  <Phone size={18} className="text-white fill-white" />+91 9601015102
+                <a href="tel:+919586500686" className="flex items-center gap-2 text-base font-bold hover:text-primary transition-colors">
+                  <Phone size={18} className="text-white fill-white" />+91 9586500686
                 </a>
                 <a href="mailto:info@venueconnect.in" className="flex items-center gap-2 text-base font-bold hover:text-primary transition-colors">
                   <Mail size={18} className="text-white fill-white" />info@venueconnect.in
@@ -245,8 +250,15 @@ const Footer = () => {
             <div className="flex items-center gap-6">
               <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Stay Connected</span>
               <div className="flex items-center gap-4">
-                {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
-                  <a key={i} href="#" className="text-slate-400 hover:text-white transition-colors"><Icon size={20} /></a>
+                {[
+                  { Icon: Facebook, href: "https://www.facebook.com/venueconnect.in/" },
+                  { Icon: Instagram, href: "https://www.instagram.com/venueconnect.in/" },
+                  { Icon: Twitter, href: "#" },
+                  { Icon: Linkedin, href: "#" }
+                ].map(({ Icon, href }, i) => (
+                  <a key={i} href={href} target={href !== "#" ? "_blank" : undefined} rel={href !== "#" ? "noopener noreferrer" : undefined} className="text-slate-400 hover:text-white transition-colors">
+                    <Icon size={20} />
+                  </a>
                 ))}
               </div>
             </div>
@@ -297,7 +309,7 @@ const Footer = () => {
           </div>
           <span className="text-[10px] font-black uppercase text-slate-500 tracking-tighter">Vendors</span>
         </Link>
-        <a href="https://wa.me/919601015102" target="_blank" className="flex flex-col items-center justify-center gap-1">
+        <a href="https://wa.me/919586500686" target="_blank" className="flex flex-col items-center justify-center gap-1">
           <div className="text-[#25D366]">
             <MessageCircle size={22} className="fill-[#25D366] text-white" />
           </div>
@@ -309,7 +321,7 @@ const Footer = () => {
       <button onClick={scrollToTop} className="hidden md:flex fixed bottom-24 right-6 w-10 h-10 bg-[#FF5722] hover:bg-[#e64a19] text-white items-center justify-center rounded shadow-lg transition-all z-50" suppressHydrationWarning>
         <ArrowUp size={24} />
       </button>
-      <a href="https://wa.me/919601015102" target="_blank"
+      <a href="https://wa.me/919586500686" target="_blank"
         className="hidden md:flex fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] text-white rounded-full shadow-2xl items-center justify-center hover:scale-110 transition-transform z-50">
         <MessageCircle size={32} className="fill-white text-[#25D366]" />
       </a>

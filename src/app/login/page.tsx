@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, ArrowRight, Home } from "lucide-react";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const nextParam = searchParams.get("next") || "/";
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState("");
@@ -41,7 +43,8 @@ export default function LoginPage() {
             }
 
             toast.success("Welcome back!");
-            router.push("/");
+            const safeRedirect = nextParam.startsWith("/") ? nextParam : "/";
+            router.push(safeRedirect);
         } catch (error: any) {
             toast.error(error.message || "Failed to sign in");
         } finally {
@@ -118,7 +121,10 @@ export default function LoginPage() {
 
                     <p className="text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{" "}
-                        <Link href="/register" className="font-semibold text-primary hover:underline">
+                        <Link 
+                            href={nextParam && nextParam !== "/" ? `/register?next=${encodeURIComponent(nextParam)}` : "/register"} 
+                            className="font-semibold text-primary hover:underline"
+                        >
                             Sign up
                         </Link>
                     </p>
@@ -127,7 +133,7 @@ export default function LoginPage() {
 
             <div className="hidden lg:block relative bg-muted/20">
                 <img
-                    src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=1600&q=80"
+                    src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80"
                     alt="Login background"
                     className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -144,5 +150,17 @@ export default function LoginPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }

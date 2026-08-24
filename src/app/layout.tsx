@@ -123,7 +123,7 @@ export default function RootLayout({
             "logo": "https://venueconnect.in/logo.webp",
             "contactPoint": {
               "@type": "ContactPoint",
-              "telephone": "+91-9601015102",
+              "telephone": "+91-9586500686",
               "contactType": "customer service",
               "availableLanguage": ["English", "Gujarati", "Hindi"]
             },
@@ -133,8 +133,8 @@ export default function RootLayout({
               "addressCountry": "IN"
             },
             "sameAs": [
-              "https://www.instagram.com/venueconnect",
-              "https://www.facebook.com/venueconnect"
+              "https://www.instagram.com/venueconnect.in/",
+              "https://www.facebook.com/venueconnect.in"
             ]
           })}
         </Script>

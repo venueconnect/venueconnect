@@ -235,7 +235,7 @@ const Navbar = () => {
             <div className="flex items-center gap-1">
               {/* WhatsApp - On right */}
               <a
-                href="https://wa.me/919601015102"
+                href="https://wa.me/919586500686"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-full transition-colors shadow-md text-[11px] font-bold"

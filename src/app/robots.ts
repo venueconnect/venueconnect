@@ -15,15 +15,6 @@ export default function robots(): MetadataRoute.Robots {
           '/private/',
         ],
       },
-      // Block AI scrapers that don't respect robots.txt honorably
-      {
-        userAgent: 'GPTBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'CCBot',
-        disallow: '/',
-      },
     ],
     sitemap: `${SITE_URL}/sitemap_index.xml`,
     host: SITE_URL,

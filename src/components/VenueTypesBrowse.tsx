@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Home, TreePine, Hotel, Waves, UtensilsCrossed, Users2, Building } from "lucide-react";
+import { Building2, Home, TreePine, Hotel, Waves, UtensilsCrossed, Users2, Building, Coffee } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -15,6 +15,7 @@ const venueTypes = [
   { icon: UtensilsCrossed, name: "Restaurants",  count: "1,500+", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80" },
   { icon: Users2,    name: "Clubs",               count: "420+",   image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=400&q=80" },
   { icon: Building,  name: "Convention Centers",  count: "340+",   image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&q=80" },
+  { icon: Coffee,    name: "Cafes",               count: "120+",   image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&q=80" },
 ];
 
 const CARD = "w-[130px] h-[130px] flex-shrink-0 relative rounded-xl overflow-hidden block";
@@ -49,7 +50,8 @@ const VenueTypesBrowse = () => {
       "Resorts": ["Resort"],
       "Restaurants": ["Restaurant"],
       "Clubs": ["Club", "Boutique Venue"],
-      "Convention Centers": ["Convention Center", "Convention Centre"]
+      "Convention Centers": ["Convention Center", "Convention Centre"],
+      "Cafes": ["Cafe"]
     };
     const dbTypes = mapping[name] || [name];
     const total = dbTypes.reduce((acc: number, t: string) => acc + (counts[t] || 0), 0);

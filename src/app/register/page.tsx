@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, User, ArrowRight, Home } from "lucide-react";
 import { toast } from "sonner";
 
-export default function RegisterPage() {
+function RegisterContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const nextParam = searchParams.get("next") || "/";
     const supabase = createClient();
     const [loading, setLoading] = useState(false);
     const [fullName, setFullName] = useState("");
@@ -38,7 +40,8 @@ export default function RegisterPage() {
 
             if (data?.session) {
                 toast.success("Account created successfully!");
-                router.push('/');
+                const safeRedirect = nextParam.startsWith("/") ? nextParam : "/";
+                router.push(safeRedirect);
                 router.refresh();
                 return;
             }
@@ -85,7 +88,7 @@ export default function RegisterPage() {
                     </p>
                     <div className="pt-6 space-y-3">
                         <Button asChild className="w-full">
-                            <Link href="/login">Return to Login</Link>
+                            <Link href={nextParam && nextParam !== "/" ? `/login?next=${encodeURIComponent(nextParam)}` : "/login"}>Return to Login</Link>
                         </Button>
                         <Button 
                             variant="outline" 
@@ -108,7 +111,7 @@ export default function RegisterPage() {
         <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
             <div className="hidden lg:block relative bg-muted/20">
                 <img
-                    src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1600&q=80"
+                    src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1600&q=80"
                     alt="Register background"
                     className="absolute inset-0 w-full h-full object-cover"
                 />
@@ -195,12 +198,27 @@ export default function RegisterPage() {
 
                     <p className="text-center text-sm text-muted-foreground">
                         Already have an account?{" "}
-                        <Link href="/login" className="font-semibold text-primary hover:underline">
+                        <Link 
+                            href={nextParam && nextParam !== "/" ? `/login?next=${encodeURIComponent(nextParam)}` : "/login"} 
+                            className="font-semibold text-primary hover:underline"
+                        >
                             Sign in
                         </Link>
                     </p>
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        }>
+            <RegisterContent />
+        </Suspense>
     );
 }

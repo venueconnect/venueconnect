@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Check, X, Phone, Mail, Calendar, Building, User } from "lucide-react";
 import { format } from "date-fns";
+
+const slugifyCity = (city?: string | null): string => {
+    return (city || "").trim().toLowerCase().replace(/\s+/g, "-");
+};
 
 export default function LeadsTab() {
     const [leads, setLeads] = useState<any[]>([]);
@@ -31,8 +36,8 @@ export default function LeadsTab() {
             const venueIds = Array.from(new Set(data.map((l: any) => l.listing_id))).filter(Boolean);
             if (venueIds.length > 0) {
                 const [venuesRes, vendorsRes] = await Promise.all([
-                    supabase.from('venues').select('id, name, selected_plan, leads_used, leads_quota').in('id', venueIds),
-                    supabase.from('vendors').select('id, name, selected_plan, leads_used, leads_quota').in('id', venueIds)
+                    supabase.from('venues').select('id, name, slug, city, selected_plan, leads_used, leads_quota').in('id', venueIds),
+                    supabase.from('vendors').select('id, name, slug, city, selected_plan, leads_used, leads_quota').in('id', venueIds)
                 ]);
 
                 const infoMap = new Map();
@@ -47,7 +52,9 @@ export default function LeadsTab() {
                         selected_plan: info.selected_plan || 'Starter',
                         leads_used: info.leads_used || 0,
                         leads_quota: info.leads_quota || 50,
-                        listing_type: info.type
+                        listing_type: info.type,
+                        slug: info.slug,
+                        city: info.city
                     };
                 });
                 setLeads(enrichedLeads);
@@ -148,7 +155,17 @@ export default function LeadsTab() {
                                     <div className="flex flex-col gap-1">
                                         <div className="flex items-center gap-2 font-bold text-slate-700">
                                             <Building size={14} className="text-primary shrink-0" />
-                                            <span className="truncate max-w-[150px]">{lead.venue_name}</span>
+                                            {lead.slug && lead.city ? (
+                                                <Link 
+                                                    href={`/${lead.listing_type || 'venue'}s/${slugifyCity(lead.city)}/${lead.slug}`}
+                                                    target="_blank"
+                                                    className="hover:text-primary hover:underline transition-colors truncate max-w-[150px]"
+                                                >
+                                                    {lead.venue_name}
+                                                </Link>
+                                            ) : (
+                                                <span className="truncate max-w-[150px]">{lead.venue_name}</span>
+                                            )}
                                         </div>
                                         <Badge variant="outline" className="w-fit text-[9px] h-4 px-1.5 font-bold uppercase opacity-60">
                                             {lead.listing_type || 'Listing'}

@@ -325,7 +325,7 @@ export const generateSEOContent = (
         "name": `VenueConnect — ${h1}`,
         "description": description,
         "url": `${baseUrl}/${categorySlug ? categorySlug + '-in-' + citySlug : citySlug}`,
-        "telephone": "+91-9601015102",
+        "telephone": "+91-9586500686",
         "priceRange": "₹–₹₹₹",
         "areaServed": {
             "@type": "City",

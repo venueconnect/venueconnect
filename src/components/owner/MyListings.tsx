@@ -285,6 +285,9 @@ function EditListingModal({ data, onClose, onSave }: { data: any, onClose: () =>
                                         <option value="Marriage Garden">Marriage Garden</option>
                                         <option value="Resort">Resort</option>
                                         <option value="Farmhouse">Farmhouse</option>
+                                        <option value="Convention Center">Convention Center</option>
+                                        <option value="Rooftop">Rooftop</option>
+                                        <option value="Cafe">Cafe</option>
                                     </select>
                                 </div>
                             )}

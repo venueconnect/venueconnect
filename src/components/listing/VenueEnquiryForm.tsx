@@ -236,7 +236,7 @@ export default function VenueEnquiryForm({ venue }: VenueEnquiryFormProps) {
                         </div>
                         <div>
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Expert Consultation</p>
-                            <p className="text-base font-black text-slate-900">+91-9104841218</p>
+                            <p className="text-base font-black text-slate-900">+91 9586500686</p>
                         </div>
                     </div>
                 </div>
@@ -254,7 +254,7 @@ export default function VenueEnquiryForm({ venue }: VenueEnquiryFormProps) {
                             </div>
                         </div>
                         <a 
-                            href={`tel:${venue.profiles?.phone_number || '+919104841218'}`}
+                            href={`tel:${venue.profiles?.phone_number || '+919586500686'}`}
                             className="px-4 py-2 bg-white text-emerald-600 text-[11px] font-black uppercase tracking-widest rounded-lg shadow-sm hover:bg-emerald-50 transition-colors border border-emerald-100"
                         >
                             Call Now
