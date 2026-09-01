@@ -173,7 +173,7 @@ const Footer = () => {
               {[
                 { l: "Privacy Policy",     h: "/privacy" },
                 { l: "Terms & Conditions", h: "/terms" },
-                { l: "Sitemap",            h: "/html-sitemap" },
+                { l: "Sitemap",            h: "/html-sitemap/" },
               ].map(({ l, h }) => (
                 <Link key={h} href={h} className="text-[11px] text-slate-400 hover:text-white transition-colors font-medium">{l}</Link>
               ))}
@@ -280,7 +280,7 @@ const Footer = () => {
             <span>,</span>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             <span>,</span>
-            <Link href="/html-sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+            <Link href="/html-sitemap/" className="hover:text-white transition-colors">Sitemap</Link>
           </div>
         </div>
       </div>
