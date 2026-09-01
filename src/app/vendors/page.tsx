@@ -290,10 +290,8 @@ function VendorsContent() {
     };
 
     const getCity = () => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('vc_user_city')?.toLowerCase() || 'ahmedabad';
-        }
-        return 'ahmedabad';
+        const raw = searchCity || (typeof window !== 'undefined' ? localStorage.getItem('vc_user_city') : null) || 'ahmedabad';
+        return raw.toLowerCase().trim().replace(/[\s/]+/g, '-');
     };
 
     return (

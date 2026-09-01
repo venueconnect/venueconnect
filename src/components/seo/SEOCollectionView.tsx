@@ -284,10 +284,11 @@ export default function SEOCollectionView({ seoPage, seoData, venues, vendors, c
                    {/* LISTING CARDS — uniform 2-col mobile grid with fixed aspect ratio image */}
                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">
                        {listingsToDisplay.map((listing: any, i: number) => {
-                           const finalSlug = buildListingSlug(listing.slug, listing.area || listing.location);
-                           const detailHref = `/${isNearMe ? (listing.city || citySlug).toLowerCase() : citySlug}${isVendorContext ? '/vendors' : ''}/${finalSlug}`;
+                           const finalSlug = buildListingSlug(listing?.slug || listing?.name || listing?.id, listing?.area || listing?.location);
+                           const baseCity = isNearMe ? (listing?.city || citySlug || 'ahmedabad').toLowerCase() : (citySlug || 'ahmedabad').toLowerCase();
+                           const detailHref = `/${baseCity}${isVendorContext ? '/vendors' : ''}/${finalSlug || listing?.id || ''}`;
                            return (
-                           <div key={listing.id || i} className="bg-white rounded-2xl md:rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-3xl transition-all duration-500 group flex flex-col hover:-translate-y-2 relative">
+                           <div key={listing?.id || i} className="bg-white rounded-2xl md:rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-3xl transition-all duration-500 group flex flex-col hover:-translate-y-2 relative">
                                {/* Entire card is a link EXCEPT the Get Quote button */}
                                <Link href={detailHref} className="flex flex-col flex-grow">
                                    {/* IMAGE PREVIEW — fixed aspect ratio for consistency */}
@@ -295,10 +296,10 @@ export default function SEOCollectionView({ seoPage, seoData, venues, vendors, c
                                        <img
                                          src={getListingImage(listing)}
                                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                         alt={listing.name}
+                                         alt={listing?.name || 'Listing'}
                                          onError={(e) => {
                                            const target = e.target as HTMLImageElement;
-                                           target.src = getVarietyFallback(listing.name);
+                                           target.src = getVarietyFallback(listing?.name || '');
                                          }}
                                        />
 
@@ -458,29 +459,29 @@ export default function SEOCollectionView({ seoPage, seoData, venues, vendors, c
                {/* DESKTOP GRID */}
                {!isVendorContext && (
                  <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                     {allListings.slice(0, 4).map((v: any) => {
-                         const finalSlug = buildListingSlug(v.slug, v.area || v.location);
+                     {allListings.slice(0, 4).map((v: any, idx: number) => {
+                         const finalSlug = buildListingSlug(v?.slug || v?.name || v?.id, v?.area || v?.location);
                          return (
-                         <Link key={`top-${v.id}`} href={`/${citySlug}${isVendorContext ? '/vendors' : ''}/${finalSlug}`} className="group bg-slate-50/50 rounded-2xl md:rounded-[2.5rem] p-3 md:p-6 border border-slate-100 hover:bg-white hover:shadow-2xl hover:border-primary/20 transition-all duration-500">
+                         <Link key={`top-${v?.id || idx}`} href={`/${citySlug}${isVendorContext ? '/vendors' : ''}/${finalSlug || v?.id || ''}`} className="group bg-slate-50/50 rounded-2xl md:rounded-[2.5rem] p-3 md:p-6 border border-slate-100 hover:bg-white hover:shadow-2xl hover:border-primary/20 transition-all duration-500">
                              <div className="relative w-full aspect-[4/3] rounded-xl md:rounded-[2rem] overflow-hidden mb-2.5 md:mb-6">
                                  
                                   <img 
                                     src={getListingImage(v)} 
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                                    alt={v.name} 
+                                    alt={v?.name || 'Listing'} 
                                     onError={(e) => {
                                       const target = e.target as HTMLImageElement;
-                                      target.src = getVarietyFallback(v.name);
+                                      target.src = getVarietyFallback(v?.name || '');
                                     }}
                                   />
                                  <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-white/95 px-1.5 py-0.5 md:px-3 md:py-1 rounded-full flex items-center gap-0.5 md:gap-1 shadow-lg">
                                      <Star size={9} className="fill-yellow-400 text-yellow-400 md:w-3 md:h-3" />
-                                     <span className="text-[9px] md:text-xs font-black">{v.rating || '4.8'}</span>
+                                     <span className="text-[9px] md:text-xs font-black">{v?.rating || '4.8'}</span>
                                  </div>
                              </div>
-                             <h4 className="text-[11px] md:text-lg font-black text-slate-900 group-hover:text-primary transition-colors line-clamp-1">{v.name}</h4>
-                             <p className="text-[9px] md:text-sm text-slate-400 font-bold flex items-center gap-0.5 md:gap-1 mt-0.5 md:mt-2 mb-1.5 md:mb-4"><MapPin size={9} className="md:w-3.5 md:h-3.5 shrink-0"/> <span className="truncate">{v.location || v.city}</span></p>
-                             <p className="text-[10px] md:text-base font-black text-slate-900">₹{v.veg_price_per_plate || v.starting_price || '750'} <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest">/ plate</span></p>
+                             <h4 className="text-[11px] md:text-lg font-black text-slate-900 group-hover:text-primary transition-colors line-clamp-1">{v?.name}</h4>
+                             <p className="text-[9px] md:text-sm text-slate-400 font-bold flex items-center gap-0.5 md:gap-1 mt-0.5 md:mt-2 mb-1.5 md:mb-4"><MapPin size={9} className="md:w-3.5 md:h-3.5 shrink-0"/> <span className="truncate">{v?.location || v?.city}</span></p>
+                             <p className="text-[10px] md:text-base font-black text-slate-900">₹{v?.veg_price_per_plate || v?.starting_price || '750'} <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest">/ plate</span></p>
                          </Link>
                          );
                      })}
