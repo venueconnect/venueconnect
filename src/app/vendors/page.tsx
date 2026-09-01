@@ -12,6 +12,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { GUJARAT_CITIES, VENDOR_TYPES } from "@/lib/constants";
 import { getListingImage } from "@/lib/imageUtils";
+import PricingGuideModal from "@/components/pricing/PricingGuideModal";
 
 const REVIEWS = [
   { name: "Amarya", text: "We recently hosted our child's first birthday with the help of VenueConnect and it was a very memorable...", title: "Wonderful Experience !", rating: 5 },
@@ -501,30 +502,41 @@ function VendorsContent() {
                 </section>
             )}
 
-            {/* 4. PRICING GUIDES (Pixel-Perfect Reference Match) */}
+            {/* 4. PRICING GUIDES (Interactive Breakdown Modal) */}
             <section className="py-10 md:py-16 bg-white border-t border-slate-50">
                 <div className="max-w-[1800px] mx-auto px-6 md:px-20 text-center">
-                    <div className="mb-8 md:mb-14">
-                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pricing Guides</h2>
+                    <div className="mb-8 md:mb-12">
+                        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-2">Pricing Guides</h2>
+                        <p className="text-xs md:text-sm text-slate-500 font-bold uppercase tracking-widest">Click any service to view market package tiers, deliverables & cost breakdown</p>
                     </div>
                      <div className="flex overflow-x-auto pb-6 no-scrollbar snap-x gap-4 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-8">
                          {(pricingGuides.length > 0 ? pricingGuides : [
-                             { title: "Photographer Prices", price: "Loading...", img: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80", path: "photographers" },
-                             { title: "Caterer Prices", price: "Loading...", img: "https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80", path: "caterers" },
-                             { title: "Makeup Artist Prices", price: "Loading...", img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80", path: "makeup-artists" },
-                             { title: "Mehndi Artist Prices", price: "Loading...", img: "https://images.unsplash.com/photo-1610173827002-62c0f1f05d04?w=600&q=80", path: "mehndi-artists" }
+                             { title: "Photographer Prices", price: "Rs.25,000/day", img: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80", path: "photographers" },
+                             { title: "Caterer Prices", price: "Rs.500/plate", img: "https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80", path: "caterers" },
+                             { title: "Makeup Artist Prices", price: "Rs.5,000/person", img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80", path: "makeup-artists" },
+                             { title: "Mehndi Artist Prices", price: "Rs.8,000/person", img: "https://images.unsplash.com/photo-1610173827002-62c0f1f05d04?w=600&q=80", path: "mehndi-artists" }
                          ]).map((p, i) => (
-                             <Link key={i} href={mounted ? `/${getCity()}/vendors/${p.path}/` : '#'} className="min-w-[70%] md:min-w-0 snap-start bg-white rounded-xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group cursor-pointer hover:shadow-2xl transition-all duration-500 border-b-4 border-b-transparent hover:border-b-primary">
-                                 <div className="w-full h-40 md:h-48 overflow-hidden">
-                                     <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.title}/>
-                                 </div>
-                                 <div className="py-3 px-4 bg-white flex-grow text-left">
-                                     <h3 className="text-[11px] md:text-sm font-black text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.title}</h3>
-                                 </div>
-                                 <div className="bg-[#EF3E36] py-2 md:py-3 text-center">
-                                     <span className="text-white font-black text-[10px] md:text-sm">{p.price}</span>
-                                 </div>
-                             </Link>
+                             <PricingGuideModal
+                                 key={i}
+                                 categoryKey={p.path}
+                                 citySlug={getCity()}
+                                 trigger={
+                                     <div className="min-w-[70%] md:min-w-0 snap-start bg-white rounded-xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group cursor-pointer hover:shadow-2xl transition-all duration-500 border-b-4 border-b-transparent hover:border-b-primary h-full text-left">
+                                         <div className="w-full h-40 md:h-48 overflow-hidden relative">
+                                             <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.title}/>
+                                             <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full opacity-90 group-hover:bg-[#EF3E36] transition-colors">
+                                                 View Guide
+                                             </div>
+                                         </div>
+                                         <div className="py-3 px-4 bg-white flex-grow text-left">
+                                             <h3 className="text-[11px] md:text-sm font-black text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.title}</h3>
+                                         </div>
+                                         <div className="bg-[#EF3E36] py-2 md:py-3 text-center">
+                                             <span className="text-white font-black text-[10px] md:text-sm">{p.price}</span>
+                                         </div>
+                                     </div>
+                                 }
+                             />
                          ))}
                      </div>
                 </div>

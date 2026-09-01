@@ -11,6 +11,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { VENDOR_TYPES, GUJARAT_CITIES } from "@/lib/constants";
 import { getListingImage } from "@/lib/imageUtils";
+import PricingGuideModal from "@/components/pricing/PricingGuideModal";
 
 const REVIEWS = [
   { name: "Amarya", text: "We recently hosted our child's first birthday with the help of VenueConnect and it was a very memorable...", title: "Wonderful Experience !", rating: 5 },
@@ -389,41 +390,45 @@ export default function CityVendorsPage({ params }: { params: Promise<{ city: st
                 </section>
             )}
 
-            {/* 4. PRICING GUIDES (Pixel-Perfect Reference Match) */}
+            {/* 4. PRICING GUIDES (Interactive Breakdown Modal) */}
             <section className="py-12 bg-white border-t border-slate-50">
                 <div className="max-w-[1800px] mx-auto px-10 md:px-20 text-center">
                     <div className="mb-14">
-                        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-4">Pricing Guides</h2>
+                        <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Pricing Guides in {cityName}</h2>
                         <p className="text-slate-500 font-bold text-sm max-w-4xl mx-auto leading-relaxed">
-                            Millions of people ask VenueConnect for event related cost estimates every year. We track the estimates they get from local event vendors, then we share those prices with you for free.
+                            Click any service to view market package tiers, deliverables, and cost breakdowns based on local event data in {cityName}.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                         {[
-                            { title: "Photographer Prices", price: "Rs.25000/shoot", img: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80", path: "photographers" },
+                            { title: "Photographer Prices", price: "Rs.25,000/day", img: "https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&q=80", path: "photographers" },
                             { title: "Caterer Prices", price: "Rs.500/plate", img: "https://images.unsplash.com/photo-1555244162-803834f70033?w=600&q=80", path: "caterers" },
-                            { title: "Makeup Artist Prices", price: "Rs.8000/person", img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80", path: "makeup-artists" },
-                            { title: "Mehndi Artist Prices", price: "Rs.5000/person", img: "https://images.unsplash.com/photo-1610173827002-62c0f1f05d04?w=400&q=80", path: "mehndi-artists" }
+                            { title: "Makeup Artist Prices", price: "Rs.5,000/person", img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80", path: "makeup-artists" },
+                            { title: "Mehndi Artist Prices", price: "Rs.8,000/person", img: "https://images.unsplash.com/photo-1610173827002-62c0f1f05d04?w=400&q=80", path: "mehndi-artists" }
                         ].map((p, i) => (
-                            <Link key={i} href={`/${citySlug}/vendors/${p.path}/`} className="bg-white rounded-xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group cursor-pointer hover:shadow-2xl transition-all duration-500">
-                                <div className="w-full h-48 overflow-hidden">
-                                    <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.title}/>
-                                </div>
-                                <div className="py-4 px-4 bg-white">
-                                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight">{p.title}</h3>
-                                </div>
-                                <div className="bg-[#EF3E36] py-3">
-                                    <span className="text-white font-black text-sm">{p.price}</span>
-                                </div>
-                            </Link>
+                            <PricingGuideModal
+                                key={i}
+                                categoryKey={p.path}
+                                citySlug={citySlug}
+                                trigger={
+                                    <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-slate-100 flex flex-col group cursor-pointer hover:shadow-2xl transition-all duration-500 h-full text-left">
+                                        <div className="w-full h-48 overflow-hidden relative">
+                                            <img src={p.img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.title}/>
+                                            <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full opacity-90 group-hover:bg-[#EF3E36] transition-colors">
+                                                View Guide
+                                            </div>
+                                        </div>
+                                        <div className="py-4 px-4 bg-white flex-grow">
+                                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-tight group-hover:text-primary transition-colors">{p.title}</h3>
+                                        </div>
+                                        <div className="bg-[#EF3E36] py-3 text-center">
+                                            <span className="text-white font-black text-sm">{p.price}</span>
+                                        </div>
+                                    </div>
+                                }
+                            />
                         ))}
-                    </div>
-
-                    <div className="flex justify-center">
-                        <Link href={`/${citySlug}/vendors/`} className="px-10 py-3 border-2 border-[#EF3E36] text-[#EF3E36] font-black uppercase text-xs tracking-widest rounded-xl hover:bg-[#EF3E36] hover:text-white transition-all shadow-xl">
-                            See all price guide
-                        </Link>
                     </div>
                 </div>
             </section>
