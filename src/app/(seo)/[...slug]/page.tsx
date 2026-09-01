@@ -26,6 +26,7 @@ import GetQuoteModal from "@/components/GetQuoteModal";
 import VenueGallery from "@/components/listing/VenueGallery";
 import ListingDescription from "@/components/listing/ListingDescription";
 import VenueEnquiryForm from "@/components/listing/VenueEnquiryForm";
+import ListingShareButton from "@/components/listing/ListingShareButton";
 import { 
     QuickInfoBar, 
     PricingDetails, 
@@ -456,9 +457,7 @@ function VenueDetailView({ venue, cityParam }: { venue: any, cityParam: string }
                             <span className="text-sm font-black">4.2</span>
                         </div>
                         <span className="text-[12px] text-slate-500 font-bold uppercase tracking-widest">(12 reviews)</span>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-xl text-slate-900 font-bold hover:bg-slate-200 transition-all cursor-pointer">
-                            <Share2 size={16} /> <span className="text-xs">Share</span>
-                        </div>
+                        <ListingShareButton title={cleanedName} />
                     </div>
                 </div>
                 <div className="flex items-center gap-2 mt-2 text-slate-500">
@@ -591,10 +590,13 @@ function VendorDetailView({ vendor, cityParam }: { vendor: any, cityParam: strin
                                             {isApproved && <Badge className="bg-green-500/10 text-green-600 border-none font-bold uppercase tracking-widest text-[9px]">Verified Pro</Badge>}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-2xl self-start md:self-center">
-                                        <Star size={18} className="fill-yellow-400 text-yellow-400" />
-                                        <span className="text-xl font-black text-slate-900">{vendor.rating || '4.8'}</span>
-                                        <span className="text-slate-400 font-bold text-sm">({vendor.reviews || 0} Reviews)</span>
+                                    <div className="flex items-center gap-3 self-start md:self-center">
+                                        <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-2xl">
+                                            <Star size={18} className="fill-yellow-400 text-yellow-400" />
+                                            <span className="text-xl font-black text-slate-900">{vendor.rating || '4.8'}</span>
+                                            <span className="text-slate-400 font-bold text-sm">({vendor.reviews || 0} Reviews)</span>
+                                        </div>
+                                        <ListingShareButton title={cleanedName} />
                                     </div>
                                 </div>
 
