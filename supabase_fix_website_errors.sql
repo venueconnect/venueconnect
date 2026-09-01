@@ -1,5 +1,5 @@
 -- ============================================================
--- VenueConnect Database Fix Migration
+-- VenueConnect Complete Database & Storage Fix Migration
 -- Run this in: Supabase Dashboard → SQL Editor
 -- ============================================================
 
@@ -49,3 +49,43 @@ END $$;
 -- (Error: "Could not find the 'area' column of 'venue_applications'")
 -- ============================================================
 ALTER TABLE venue_applications ADD COLUMN IF NOT EXISTS area text;
+
+
+-- ============================================================
+-- FIX 3: Create 'venue-gallery' and 'venue_applications_images' Storage Buckets
+-- (Error: "Failed to upload resort.jpg: Bucket not found")
+-- ============================================================
+
+-- 1. Create buckets if they don't exist and make them public
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES 
+  ('venue-gallery', 'venue-gallery', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']),
+  ('venue_applications_images', 'venue_applications_images', true, 10485760, ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'])
+ON CONFLICT (id) DO UPDATE 
+SET public = true, 
+    file_size_limit = 10485760, 
+    allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+
+-- 2. Allow public read access to all images
+DROP POLICY IF EXISTS "Public read access for venue-gallery" ON storage.objects;
+CREATE POLICY "Public read access for venue-gallery"
+ON storage.objects FOR SELECT
+USING (bucket_id IN ('venue-gallery', 'venue_applications_images'));
+
+-- 3. Allow anonymous & authenticated users to upload images
+DROP POLICY IF EXISTS "Allow uploads to venue-gallery" ON storage.objects;
+CREATE POLICY "Allow uploads to venue-gallery"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id IN ('venue-gallery', 'venue_applications_images'));
+
+-- 4. Allow users to update their uploads
+DROP POLICY IF EXISTS "Allow updates to venue-gallery" ON storage.objects;
+CREATE POLICY "Allow updates to venue-gallery"
+ON storage.objects FOR UPDATE
+USING (bucket_id IN ('venue-gallery', 'venue_applications_images'));
+
+-- 5. Allow users to delete their uploads
+DROP POLICY IF EXISTS "Allow deletions from venue-gallery" ON storage.objects;
+CREATE POLICY "Allow deletions from venue-gallery"
+ON storage.objects FOR DELETE
+USING (bucket_id IN ('venue-gallery', 'venue_applications_images'));
