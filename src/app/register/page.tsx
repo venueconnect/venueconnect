@@ -32,7 +32,7 @@ function RegisterContent() {
                     data: {
                         full_name: fullName,
                     },
-                    emailRedirectTo: `${window.location.origin}/login`
+                    emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
                 }
             });
 
@@ -62,7 +62,7 @@ function RegisterContent() {
                 type: 'signup',
                 email: email,
                 options: {
-                    emailRedirectTo: `${window.location.origin}/login`
+                    emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
                 }
             });
             if (error) throw error;

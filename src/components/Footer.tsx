@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import {
-  Mail, Phone, Instagram, Facebook, Twitter, Linkedin,
+  Mail, Phone, Instagram, Facebook,
   MessageCircle, ArrowUp, ChevronDown
 } from "lucide-react";
 
@@ -86,11 +86,9 @@ const Footer = () => {
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Follow</span>
           {[
             { Icon: Facebook, href: "https://www.facebook.com/venueconnect.in/" },
-            { Icon: Instagram, href: "https://www.instagram.com/venueconnect.in/" },
-            { Icon: Twitter, href: "#" },
-            { Icon: Linkedin, href: "#" }
+            { Icon: Instagram, href: "https://www.instagram.com/venueconnect.in/" }
           ].map(({ Icon, href }, i) => (
-            <a key={i} href={href} target={href !== "#" ? "_blank" : undefined} rel={href !== "#" ? "noopener noreferrer" : undefined} className="text-slate-400 hover:text-white transition-colors">
+            <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
               <Icon size={17} />
             </a>
           ))}
@@ -175,7 +173,7 @@ const Footer = () => {
               {[
                 { l: "Privacy Policy",     h: "/privacy" },
                 { l: "Terms & Conditions", h: "/terms" },
-                { l: "Sitemap",            h: "/sitemap" },
+                { l: "Sitemap",            h: "/html-sitemap" },
               ].map(({ l, h }) => (
                 <Link key={h} href={h} className="text-[11px] text-slate-400 hover:text-white transition-colors font-medium">{l}</Link>
               ))}
@@ -252,11 +250,9 @@ const Footer = () => {
               <div className="flex items-center gap-4">
                 {[
                   { Icon: Facebook, href: "https://www.facebook.com/venueconnect.in/" },
-                  { Icon: Instagram, href: "https://www.instagram.com/venueconnect.in/" },
-                  { Icon: Twitter, href: "#" },
-                  { Icon: Linkedin, href: "#" }
+                  { Icon: Instagram, href: "https://www.instagram.com/venueconnect.in/" }
                 ].map(({ Icon, href }, i) => (
-                  <a key={i} href={href} target={href !== "#" ? "_blank" : undefined} rel={href !== "#" ? "noopener noreferrer" : undefined} className="text-slate-400 hover:text-white transition-colors">
+                  <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
                     <Icon size={20} />
                   </a>
                 ))}
@@ -284,7 +280,7 @@ const Footer = () => {
             <span>,</span>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             <span>,</span>
-            <Link href="/sitemap" className="hover:text-white transition-colors">Sitemap</Link>
+            <Link href="/html-sitemap" className="hover:text-white transition-colors">Sitemap</Link>
           </div>
         </div>
       </div>

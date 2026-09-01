@@ -83,7 +83,7 @@ export default function ContactPage() {
                                     </div>
                                     Call Us
                                 </div>
-                                <p className="text-muted-foreground pl-13">+91 9586500686</p>
+                                <a href="tel:+919586500686" className="text-muted-foreground pl-13 hover:text-primary transition-colors">+91 9586500686</a>
                                 <p className="text-muted-foreground text-sm pl-13">Mon - Sat, 9am - 7pm</p>
                             </div>
 
@@ -94,7 +94,7 @@ export default function ContactPage() {
                                     </div>
                                     Email Us
                                 </div>
-                                <p className="text-muted-foreground pl-13">info@venueconnect.in</p>
+                                <a href="mailto:info@venueconnect.in" className="text-muted-foreground pl-13 hover:text-primary transition-colors">info@venueconnect.in</a>
                             </div>
 
                             <div className="flex flex-col gap-2">

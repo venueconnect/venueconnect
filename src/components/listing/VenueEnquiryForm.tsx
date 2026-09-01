@@ -230,7 +230,7 @@ export default function VenueEnquiryForm({ venue }: VenueEnquiryFormProps) {
 
                 {/* Call Expert Section */}
                 <div className="mt-8 pt-6 border-t border-slate-100">
-                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group/call cursor-pointer hover:bg-slate-100 transition-colors">
+                    <a href="tel:+919586500686" className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group/call cursor-pointer hover:bg-slate-100 transition-colors">
                         <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg group-hover/call:rotate-12 transition-transform">
                             <Phone size={20} />
                         </div>
@@ -238,7 +238,7 @@ export default function VenueEnquiryForm({ venue }: VenueEnquiryFormProps) {
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Expert Consultation</p>
                             <p className="text-base font-black text-slate-900">+91 9586500686</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
 
                 {/* Venue Direct Call Section */}

@@ -421,7 +421,7 @@ export default function CityVendorsPage({ params }: { params: Promise<{ city: st
                     </div>
 
                     <div className="flex justify-center">
-                        <Link href={`/${citySlug}/pricing`} className="px-10 py-3 border-2 border-[#EF3E36] text-[#EF3E36] font-black uppercase text-xs tracking-widest rounded-xl hover:bg-[#EF3E36] hover:text-white transition-all shadow-xl">
+                        <Link href={`/${citySlug}/vendors/`} className="px-10 py-3 border-2 border-[#EF3E36] text-[#EF3E36] font-black uppercase text-xs tracking-widest rounded-xl hover:bg-[#EF3E36] hover:text-white transition-all shadow-xl">
                             See all price guide
                         </Link>
                     </div>

@@ -81,22 +81,7 @@ export default function RequirementWizard() {
 
         setLoading(true);
         try {
-            // 1. Prepare data for Supabase (only standard columns to avoid schema errors)
-            const supabaseData = {
-                occasion: formData.occasion,
-                city: formData.city,
-                budget_per_person: formData.budget_per_person,
-                expected_guests: parseInt(formData.expected_guests) || 0,
-                event_date: formData.event_date,
-                customer_name: formData.customer_name,
-                customer_email: formData.customer_email,
-                customer_phone: formData.customer_phone
-            };
-
-            const { error } = await supabase.from('user_requirements').insert([supabaseData]);
-            if (error) throw error;
-
-            // 2. Prepare full data for Google Sheets (includes checkboxes)
+            // 1. Send to Google Sheets FIRST (always saves the lead, even if DB fails)
             const sheetData = {
                 ...formData,
                 expected_guests: parseInt(formData.expected_guests) || 0
@@ -114,6 +99,27 @@ export default function RequirementWizard() {
                 } catch (sheetError) {
                     console.error("Sheet Sync Error:", sheetError);
                 }
+            }
+
+            // 2. Save to Supabase (graceful — don't block form success if DB table is missing)
+            const supabaseData = {
+                occasion: formData.occasion,
+                city: formData.city,
+                budget_per_person: formData.budget_per_person,
+                expected_guests: parseInt(formData.expected_guests) || 0,
+                event_date: formData.event_date,
+                customer_name: formData.customer_name,
+                customer_email: formData.customer_email,
+                customer_phone: formData.customer_phone
+            };
+
+            try {
+                const { error } = await supabase.from('user_requirements').insert([supabaseData]);
+                if (error) {
+                    console.error("Supabase insert error (non-blocking):", error.message);
+                }
+            } catch (dbError) {
+                console.error("Supabase connection error (non-blocking):", dbError);
             }
 
             toast.success("Request Submitted Successfully!");

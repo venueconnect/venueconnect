@@ -72,16 +72,39 @@ export default function ListingHeaderActions({ listing, type }: ListingHeaderAct
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: listing.name,
-        text: `Check out ${listing.name} on VenueConnect!`,
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard!");
+  const handleShare = async () => {
+    const shareData = {
+      title: listing.name,
+      text: `Check out ${listing.name} on VenueConnect!`,
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (err: any) {
+      // User cancelled share or share failed — fallback to clipboard
+      if (err?.name !== 'AbortError') {
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          toast.success("Link copied to clipboard!");
+        } catch {
+          // Final fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = window.location.href;
+          textArea.style.position = 'fixed';
+          textArea.style.opacity = '0';
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          toast.success("Link copied to clipboard!");
+        }
+      }
     }
   };
 
