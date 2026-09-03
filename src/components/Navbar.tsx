@@ -197,7 +197,7 @@ const Navbar = () => {
                   <Link href="/profile" className="cursor-pointer">My Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/profile" className="cursor-pointer">Saved Shortlist</Link>
+                  <Link href="/shortlist" className="cursor-pointer">Saved Shortlist</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
@@ -317,7 +317,7 @@ const Navbar = () => {
                       <Link href="/owner" className="block w-full py-3 px-4 bg-amber-50 text-amber-700 rounded-xl font-bold text-center" onClick={() => setOpen(false)}>Lister Dashboard</Link>
                     )}
                     <Link href="/profile" className="block w-full py-3 px-4 bg-white border border-slate-200 rounded-xl font-bold text-center" onClick={() => setOpen(false)}>My Profile</Link>
-                    <Link href="/profile" className="block w-full py-3 px-4 bg-white border border-slate-200 rounded-xl font-bold text-center" onClick={() => setOpen(false)}>Saved Shortlist</Link>
+                    <Link href="/shortlist" className="block w-full py-3 px-4 bg-white border border-slate-200 rounded-xl font-bold text-center" onClick={() => setOpen(false)}>Saved Shortlist</Link>
                     <Button
                       variant="destructive"
                       className="w-full py-6 rounded-xl font-bold text-base mt-2"

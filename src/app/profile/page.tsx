@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, LogOut, User, Shield, Phone, Loader2, Eye, EyeOff, Check } from "lucide-react";
+import Link from "next/link";
+import { Mail, LogOut, User, Shield, Phone, Loader2, Eye, EyeOff, Check, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -106,7 +107,17 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-slate-50 py-16">
             <div className="container px-4 max-w-2xl mx-auto">
-                <h1 className="text-3xl font-display font-bold text-slate-900 mb-8">Account Settings</h1>
+                <div className="flex items-center justify-between gap-4 mb-6">
+                    <h1 className="text-3xl font-display font-bold text-slate-900">Account Settings</h1>
+                    <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-slate-200 shadow-sm text-xs font-bold">
+                        <span className="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white flex items-center gap-1.5">
+                            <User size={13} /> Settings
+                        </span>
+                        <Link href="/shortlist" className="px-3.5 py-1.5 rounded-xl text-slate-500 hover:text-slate-900 flex items-center gap-1.5 transition-colors">
+                            <Heart size={13} className="text-rose-500" /> Shortlist
+                        </Link>
+                    </div>
+                </div>
                 
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 space-y-8">
                     {/* Profile Header */}

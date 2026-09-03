@@ -101,7 +101,7 @@ export default function RequirementWizard() {
                 }
             }
 
-            // 2. Save to Supabase (graceful — don't block form success if DB table is missing)
+            // 2. Save to Supabase (user_requirements + leads)
             const supabaseData = {
                 occasion: formData.occasion,
                 city: formData.city,
@@ -114,12 +114,24 @@ export default function RequirementWizard() {
             };
 
             try {
-                const { error } = await supabase.from('user_requirements').insert([supabaseData]);
-                if (error) {
-                    console.error("Supabase insert error (non-blocking):", error.message);
-                }
+                await supabase.from('user_requirements').insert([supabaseData]);
             } catch (dbError) {
-                console.error("Supabase connection error (non-blocking):", dbError);
+                console.error("Supabase user_requirements error (non-blocking):", dbError);
+            }
+
+            try {
+                await supabase.from('leads').insert([{
+                    listing_id: null,
+                    listing_type: 'platform',
+                    customer_name: formData.customer_name,
+                    customer_email: `PENDING_ADMIN_${formData.customer_email || 'no-email@venueconnect.in'}`,
+                    customer_phone: formData.customer_phone,
+                    event_date: formData.event_date || null,
+                    message: `Occasion: ${formData.occasion} | City: ${formData.city} | Guests: ${formData.expected_guests} | Budget: ${formData.budget_per_person}`,
+                    status: 'new'
+                }]);
+            } catch (leadsErr) {
+                console.error("Supabase leads insert error (non-blocking):", leadsErr);
             }
 
             toast.success("Request Submitted Successfully!");

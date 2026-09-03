@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin, Phone, Mail, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ContactPage() {
     const [firstName, setFirstName] = useState("");
@@ -18,32 +19,51 @@ export default function ContactPage() {
     const [subject, setSubject] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const supabase = createClient();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            // 1. Send to Google Sheets
             const url = process.env.NEXT_PUBLIC_GOOGLE_SHEETS_URL;
-            if (!url) {
-                throw new Error("Submission service is not configured.");
+            if (url) {
+                try {
+                    await fetch(url, {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            type: "General Contact Inquiry",
+                            name: `${firstName} ${lastName}`.trim(),
+                            email,
+                            subject,
+                            message,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                } catch (sheetErr) {
+                    console.error("Sheet error:", sheetErr);
+                }
             }
 
-            await fetch(url, {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    type: "General Contact Inquiry",
-                    name: `${firstName} ${lastName}`.trim(),
-                    email,
-                    subject,
-                    message,
-                    timestamp: new Date().toISOString()
-                })
-            });
+            // 2. Save to Supabase leads table so it appears in Admin Panel Leads
+            try {
+                await supabase.from('leads').insert([{
+                    listing_id: null,
+                    listing_type: 'contact',
+                    customer_name: `${firstName} ${lastName}`.trim(),
+                    customer_email: email,
+                    customer_phone: 'N/A',
+                    message: `[Contact Form] Subject: ${subject} | Message: ${message}`,
+                    status: 'new'
+                }]);
+            } catch (dbErr) {
+                console.error("Supabase contact lead error:", dbErr);
+            }
 
             toast.success("Thank you! Your message has been sent successfully.");
             setFirstName("");
