@@ -88,25 +88,30 @@ export async function GET(req: NextRequest) {
 
         const formattedRequirements = (userReqs || [])
             .filter((r: any) => !existingPhones.has(`${r.customer_phone}_${r.created_at?.slice(0, 10)}`))
-            .map((r: any) => ({
-                id: `req_${r.id}`,
-                created_at: r.created_at,
-                source: 'requirement',
-                customer_name: r.customer_name || 'Anonymous User',
-                customer_email: r.customer_email || 'N/A',
-                is_pending_approval: false,
-                customer_phone: r.customer_phone || 'N/A',
-                event_date: r.event_date || null,
-                message: `Occasion: ${r.occasion || 'N/A'} | City: ${r.city || 'Gujarat'} | Guests: ${r.expected_guests || 0} | Budget: ${r.budget_per_person || 'Standard'}`,
-                status: 'new',
-                listing_id: null,
-                listing_name: 'Homepage Requirement Wizard',
-                listing_type: 'platform',
-                city: r.city || 'Gujarat',
-                selected_plan: 'Platform',
-                leads_used: 0,
-                leads_quota: 0
-            }));
+            .map((r: any) => {
+                const isContact = (r.occasion || '').startsWith('[Contact Form]');
+                return {
+                    id: `req_${r.id}`,
+                    created_at: r.created_at,
+                    source: isContact ? 'contact' : 'requirement',
+                    customer_name: r.customer_name || 'Anonymous User',
+                    customer_email: r.customer_email || 'N/A',
+                    is_pending_approval: false,
+                    customer_phone: r.customer_phone || 'N/A',
+                    event_date: r.event_date || null,
+                    message: isContact 
+                        ? `${r.occasion} — ${r.budget_per_person || ''}` 
+                        : `Occasion: ${r.occasion || 'N/A'} | City: ${r.city || 'Gujarat'} | Guests: ${r.expected_guests || 0} | Budget: ${r.budget_per_person || 'Standard'}`,
+                    status: 'new',
+                    listing_id: null,
+                    listing_name: isContact ? 'Contact Us Form' : 'Homepage Requirement Wizard',
+                    listing_type: 'platform',
+                    city: r.city || 'Gujarat',
+                    selected_plan: 'Platform',
+                    leads_used: 0,
+                    leads_quota: 0
+                };
+            });
 
         // Combine all leads and sort by creation date descending
         let allLeads = [...formattedDirectLeads, ...formattedRequirements];

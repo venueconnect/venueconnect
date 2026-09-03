@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { 
     Heart, Building2, Store, MapPin, Star, Users2, 
     Trash2, ArrowRight, Sparkles, Phone, ShieldCheck, Loader2 
@@ -121,8 +119,6 @@ export default function ShortlistPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col">
-            <Navbar />
-
             <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 w-full">
                 {/* Header Banner */}
                 <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-sm mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -325,8 +321,6 @@ export default function ShortlistPage() {
                     </div>
                 )}
             </main>
-
-            <Footer />
         </div>
     );
 }

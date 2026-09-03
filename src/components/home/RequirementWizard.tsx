@@ -101,37 +101,15 @@ export default function RequirementWizard() {
                 }
             }
 
-            // 2. Save to Supabase (user_requirements + leads)
-            const supabaseData = {
-                occasion: formData.occasion,
-                city: formData.city,
-                budget_per_person: formData.budget_per_person,
-                expected_guests: parseInt(formData.expected_guests) || 0,
-                event_date: formData.event_date,
-                customer_name: formData.customer_name,
-                customer_email: formData.customer_email,
-                customer_phone: formData.customer_phone
-            };
-
+            // 2. Save via Server API to guarantee Database persistence (bypasses browser RLS)
             try {
-                await supabase.from('user_requirements').insert([supabaseData]);
-            } catch (dbError) {
-                console.error("Supabase user_requirements error (non-blocking):", dbError);
-            }
-
-            try {
-                await supabase.from('leads').insert([{
-                    listing_id: null,
-                    listing_type: 'platform',
-                    customer_name: formData.customer_name,
-                    customer_email: `PENDING_ADMIN_${formData.customer_email || 'no-email@venueconnect.in'}`,
-                    customer_phone: formData.customer_phone,
-                    event_date: formData.event_date || null,
-                    message: `Occasion: ${formData.occasion} | City: ${formData.city} | Guests: ${formData.expected_guests} | Budget: ${formData.budget_per_person}`,
-                    status: 'new'
-                }]);
-            } catch (leadsErr) {
-                console.error("Supabase leads insert error (non-blocking):", leadsErr);
+                await fetch('/api/submit-requirement', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+            } catch (apiErr) {
+                console.error("API submit requirement error:", apiErr);
             }
 
             toast.success("Request Submitted Successfully!");
