@@ -12,7 +12,7 @@ const getAdminSupabase = () => {
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
-        const sourceFilter = searchParams.get('source') || 'all'; // 'all', 'requirements', 'listings', 'contact'
+        const sourceFilter = searchParams.get('source') || 'all'; // 'all', 'requirement', 'listing', 'contact'
         const statusFilter = searchParams.get('status') || 'all';
 
         const supabase = getAdminSupabase();
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
             console.error("Error fetching leads:", leadsError);
         }
 
-        // 2. Fetch from 'user_requirements' table (Homepage Wizard Submissions)
+        // 2. Fetch from 'user_requirements' table (Homepage Wizard Submissions & Contact)
         const { data: userReqs, error: reqsError } = await supabase
             .from('user_requirements')
             .select('*')
@@ -62,17 +62,22 @@ export async function GET(req: NextRequest) {
             const isPlatform = !l.listing_id || l.listing_type === 'platform' || l.listing_type === 'general';
             const isContact = l.listing_type === 'contact';
             
+            // Normalize status
+            let normalizedStatus = l.status || 'new';
+            if ((l.customer_email || '').startsWith('PENDING_ADMIN_')) {
+                normalizedStatus = 'pending';
+            }
+
             return {
                 id: l.id,
                 created_at: l.created_at,
                 source: isContact ? 'contact' : isPlatform ? 'requirement' : 'listing',
                 customer_name: l.customer_name || 'Anonymous User',
                 customer_email: (l.customer_email || '').replace('PENDING_ADMIN_', ''),
-                is_pending_approval: (l.customer_email || '').startsWith('PENDING_ADMIN_'),
                 customer_phone: l.customer_phone || l.customer_mobile || 'N/A',
                 event_date: l.event_date || null,
                 message: l.message || '',
-                status: l.status || 'new',
+                status: normalizedStatus,
                 listing_id: l.listing_id,
                 listing_name: info.name || (isContact ? 'Contact Us Form' : isPlatform ? 'Homepage Requirement' : 'Direct Enquiry'),
                 listing_type: info.type || l.listing_type || 'venue',
@@ -83,26 +88,35 @@ export async function GET(req: NextRequest) {
             };
         });
 
-        // 5. Format user_requirements (avoid duplicates if already present in leads table with same phone & date)
+        // 5. Format user_requirements
         const existingPhones = new Set(formattedDirectLeads.map((l: any) => `${l.customer_phone}_${l.created_at?.slice(0, 10)}`));
 
         const formattedRequirements = (userReqs || [])
             .filter((r: any) => !existingPhones.has(`${r.customer_phone}_${r.created_at?.slice(0, 10)}`))
             .map((r: any) => {
                 const isContact = (r.occasion || '').startsWith('[Contact Form]');
+                
+                // Check if status is stored in occasion e.g. [STATUS:contacted]
+                let reqStatus = 'new';
+                let cleanOccasion = r.occasion || '';
+                const statusMatch = cleanOccasion.match(/\[STATUS:(\w+)\]/);
+                if (statusMatch) {
+                    reqStatus = statusMatch[1];
+                    cleanOccasion = cleanOccasion.replace(/\[STATUS:\w+\]\s*/, '');
+                }
+
                 return {
                     id: `req_${r.id}`,
                     created_at: r.created_at,
                     source: isContact ? 'contact' : 'requirement',
                     customer_name: r.customer_name || 'Anonymous User',
                     customer_email: r.customer_email || 'N/A',
-                    is_pending_approval: false,
                     customer_phone: r.customer_phone || 'N/A',
                     event_date: r.event_date || null,
                     message: isContact 
-                        ? `${r.occasion} — ${r.budget_per_person || ''}` 
-                        : `Occasion: ${r.occasion || 'N/A'} | City: ${r.city || 'Gujarat'} | Guests: ${r.expected_guests || 0} | Budget: ${r.budget_per_person || 'Standard'}`,
-                    status: 'new',
+                        ? `${cleanOccasion} — ${r.budget_per_person || ''}` 
+                        : `Occasion: ${cleanOccasion || 'N/A'} | City: ${r.city || 'Gujarat'} | Guests: ${r.expected_guests || 0} | Budget: ${r.budget_per_person || 'Standard'}`,
+                    status: reqStatus,
                     listing_id: null,
                     listing_name: isContact ? 'Contact Us Form' : 'Homepage Requirement Wizard',
                     listing_type: 'platform',
@@ -122,6 +136,11 @@ export async function GET(req: NextRequest) {
             allLeads = allLeads.filter(l => l.source === sourceFilter);
         }
 
+        // Apply status filter if requested
+        if (statusFilter !== 'all') {
+            allLeads = allLeads.filter(l => l.status === statusFilter);
+        }
+
         return NextResponse.json({ leads: allLeads, total: allLeads.length });
     } catch (error: any) {
         console.error("API /api/admin/leads error:", error);
@@ -139,21 +158,30 @@ export async function PATCH(req: NextRequest) {
         }
 
         const supabase = getAdminSupabase();
+        const targetStatus = status || (action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'contacted');
 
-        // If it's a user_requirements ID
+        // Handle user_requirements row
         if (leadId.startsWith('req_')) {
             const realId = leadId.replace('req_', '');
-            return NextResponse.json({ success: true, message: "Requirement acknowledged" });
+            const { data: reqRow } = await supabase.from('user_requirements').select('occasion').eq('id', realId).single();
+            if (reqRow) {
+                let cleanOccasion = (reqRow.occasion || '').replace(/\[STATUS:\w+\]\s*/, '');
+                const updatedOccasion = `[STATUS:${targetStatus}] ${cleanOccasion}`;
+                await supabase.from('user_requirements').update({ occasion: updatedOccasion }).eq('id', realId);
+            }
+            return NextResponse.json({ success: true, message: `Status updated to ${targetStatus}` });
         }
 
-        // Standard lead in 'leads' table
-        if (action === 'approve') {
-            const { data: lead } = await supabase.from('leads').select('*').eq('id', leadId).single();
-            if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
+        // Handle standard 'leads' table row
+        const { data: lead } = await supabase.from('leads').select('*').eq('id', leadId).single();
+        if (!lead) return NextResponse.json({ error: "Lead not found" }, { status: 404 });
 
-            const cleanEmail = (lead.customer_email || '').replace('PENDING_ADMIN_', '');
-            await supabase.from('leads').update({ customer_email: cleanEmail, status: 'approved' }).eq('id', leadId);
+        const cleanEmail = (lead.customer_email || '').replace('PENDING_ADMIN_', '');
+        const updatePayload: any = { status: targetStatus };
 
+        // If approving, make sure PENDING_ADMIN_ prefix is cleaned so owner can contact
+        if (targetStatus === 'approved') {
+            updatePayload.customer_email = cleanEmail;
             if (lead.listing_id) {
                 try {
                     await supabase.rpc('increment_leads', {
@@ -164,15 +192,34 @@ export async function PATCH(req: NextRequest) {
                     console.error("RPC increment error:", rpcErr);
                 }
             }
-            return NextResponse.json({ success: true, message: "Lead approved" });
         }
 
-        if (status) {
-            await supabase.from('leads').update({ status }).eq('id', leadId);
-            return NextResponse.json({ success: true, message: "Status updated" });
+        await supabase.from('leads').update(updatePayload).eq('id', leadId);
+        return NextResponse.json({ success: true, message: `Status updated to ${targetStatus}` });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const leadId = searchParams.get('id');
+
+        if (!leadId) {
+            return NextResponse.json({ error: "Missing lead id" }, { status: 400 });
         }
 
-        return NextResponse.json({ error: "No action specified" }, { status: 400 });
+        const supabase = getAdminSupabase();
+
+        if (leadId.startsWith('req_')) {
+            const realId = leadId.replace('req_', '');
+            await supabase.from('user_requirements').delete().eq('id', realId);
+        } else {
+            await supabase.from('leads').delete().eq('id', leadId);
+        }
+
+        return NextResponse.json({ success: true, message: "Lead deleted successfully" });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

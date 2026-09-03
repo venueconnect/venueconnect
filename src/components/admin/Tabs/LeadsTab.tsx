@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { 
     Check, X, Phone, Mail, Calendar, Building, User, 
-    Search, RefreshCw, Filter, Sparkles, MessageSquare, MapPin 
+    Search, RefreshCw, Filter, Sparkles, MessageSquare, MapPin,
+    Trash2, ChevronDown, CheckCircle2, Clock, AlertCircle
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -16,16 +17,18 @@ export default function LeadsTab() {
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [sourceFilter, setSourceFilter] = useState<'all' | 'requirement' | 'listing' | 'contact'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'new' | 'contacted' | 'approved' | 'rejected'>('all');
     const [search, setSearch] = useState('');
+    const [updatingId, setUpdatingId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchLeads();
-    }, [sourceFilter]);
+    }, [sourceFilter, statusFilter]);
 
     const fetchLeads = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`/api/admin/leads?source=${sourceFilter}`);
+            const res = await fetch(`/api/admin/leads?source=${sourceFilter}&status=${statusFilter}`);
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Failed to fetch leads");
             setLeads(data.leads || []);
@@ -37,44 +40,46 @@ export default function LeadsTab() {
         }
     };
 
-    const handleApprove = async (lead: any) => {
-        const toastId = toast.loading("Approving lead...");
+    const handleStatusChange = async (leadId: string, newStatus: string) => {
         try {
+            setUpdatingId(leadId);
+            // Optimistic update
+            setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+
             const res = await fetch('/api/admin/leads', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ leadId: lead.id, action: 'approve' })
+                body: JSON.stringify({ leadId, status: newStatus })
             });
             const data = await res.json();
             if (res.ok) {
-                toast.dismiss(toastId);
-                toast.success("Lead approved and unlocked for lister!");
-                fetchLeads();
+                toast.success(`Status changed to ${newStatus.toUpperCase()}`);
             } else {
-                toast.dismiss(toastId);
-                throw new Error(data.error || "Approval failed");
+                toast.error(data.error || "Failed to update status");
+                fetchLeads();
             }
-        } catch (error: any) {
-            toast.dismiss(toastId);
-            toast.error(error.message);
+        } catch (e: any) {
+            toast.error("Status update error");
+            fetchLeads();
+        } finally {
+            setUpdatingId(null);
         }
     };
 
-    const handleStatusChange = async (leadId: string, status: string) => {
+    const handleDelete = async (leadId: string, customerName: string) => {
+        if (!confirm(`Are you sure you want to permanently delete lead for "${customerName}"?`)) return;
         try {
-            const res = await fetch('/api/admin/leads', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ leadId, status })
+            const res = await fetch(`/api/admin/leads?id=${leadId}`, {
+                method: 'DELETE'
             });
             if (res.ok) {
-                toast.success(`Lead marked as ${status}`);
-                fetchLeads();
+                toast.success("Lead removed successfully");
+                setLeads(prev => prev.filter(l => l.id !== leadId));
             } else {
-                toast.error("Failed to update status");
+                toast.error("Failed to delete lead");
             }
         } catch (e) {
-            toast.error("Status update error");
+            toast.error("Delete error");
         }
     };
 
@@ -91,18 +96,36 @@ export default function LeadsTab() {
         );
     });
 
-    const pendingCount = leads.filter(l => l.is_pending_approval).length;
+    const pendingCount = leads.filter(l => l.status === 'pending').length;
+
+    // Helper for Status Badge Styling
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case 'pending':
+                return 'bg-amber-100 text-amber-800 border-amber-300 focus:ring-amber-400';
+            case 'new':
+                return 'bg-blue-100 text-blue-800 border-blue-300 focus:ring-blue-400';
+            case 'contacted':
+                return 'bg-purple-100 text-purple-800 border-purple-300 focus:ring-purple-400';
+            case 'approved':
+                return 'bg-emerald-100 text-emerald-800 border-emerald-300 focus:ring-emerald-400';
+            case 'rejected':
+                return 'bg-rose-100 text-rose-800 border-rose-300 focus:ring-rose-400';
+            default:
+                return 'bg-slate-100 text-slate-800 border-slate-300 focus:ring-slate-400';
+        }
+    };
 
     return (
-        <div className="space-y-6 pb-20">
+        <div className="space-y-6 pb-20 animate-in fade-in duration-300">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight font-display">
+                    <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-display">
                         Lead Management
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
-                        Incoming customer requirements, quote requests, and contact messages.
+                        Track, assign and update status for all customer requirements, quotes, and inquiries.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -114,44 +137,73 @@ export default function LeadsTab() {
                     >
                         <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
                     </Button>
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 text-xs px-3 py-1 font-bold">
-                        {pendingCount} Pending Approval
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs px-3 py-1 font-black uppercase tracking-wider">
+                        {pendingCount} Pending Review
                     </Badge>
                 </div>
             </div>
 
-            {/* Filters and Search Bar */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto no-scrollbar pb-1 md:pb-0">
-                    {[
-                        { label: 'All Leads', val: 'all' },
-                        { label: 'Homepage Requirements', val: 'requirement' },
-                        { label: 'Listing Enquiries', val: 'listing' },
-                        { label: 'Contact Messages', val: 'contact' }
-                    ].map(f => (
-                        <button
-                            key={f.val}
-                            onClick={() => setSourceFilter(f.val as any)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
-                                sourceFilter === f.val 
-                                    ? 'bg-slate-900 text-white shadow-md' 
-                                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                            }`}
-                        >
-                            {f.label}
-                        </button>
-                    ))}
+            {/* Filter Tabs & Search */}
+            <div className="bg-white p-4 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                {/* Row 1: Source & Search */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto no-scrollbar pb-1 md:pb-0">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Source:</span>
+                        {[
+                            { label: 'All Sources', val: 'all' },
+                            { label: 'Homepage Forms', val: 'requirement' },
+                            { label: 'Direct Listings', val: 'listing' },
+                            { label: 'Contact Messages', val: 'contact' }
+                        ].map(f => (
+                            <button
+                                key={f.val}
+                                onClick={() => setSourceFilter(f.val as any)}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                                    sourceFilter === f.val 
+                                        ? 'bg-slate-900 text-white shadow-md' 
+                                        : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                                }`}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="relative w-full md:w-72">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                        <input 
+                            type="text"
+                            placeholder="Search customer, phone, city..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                    </div>
                 </div>
 
-                <div className="relative w-full md:w-72">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                    <input 
-                        type="text"
-                        placeholder="Search name, phone, city..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    />
+                {/* Row 2: Status Filter Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-2 border-t border-slate-50">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-1">Status:</span>
+                    {[
+                        { label: 'All Statuses', val: 'all', badge: 'bg-slate-100 text-slate-600' },
+                        { label: 'Pending Approval', val: 'pending', badge: 'bg-amber-100 text-amber-800' },
+                        { label: 'New', val: 'new', badge: 'bg-blue-100 text-blue-800' },
+                        { label: 'Contacted', val: 'contacted', badge: 'bg-purple-100 text-purple-800' },
+                        { label: 'Approved', val: 'approved', badge: 'bg-emerald-100 text-emerald-800' },
+                        { label: 'Rejected', val: 'rejected', badge: 'bg-rose-100 text-rose-800' }
+                    ].map(st => (
+                        <button
+                            key={st.val}
+                            onClick={() => setStatusFilter(st.val as any)}
+                            className={`px-3 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border ${
+                                statusFilter === st.val
+                                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                            }`}
+                        >
+                            {st.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
@@ -165,18 +217,18 @@ export default function LeadsTab() {
                             <MessageSquare size={24} />
                         </div>
                         <h4 className="text-base font-black text-slate-800 mb-1">No Leads Found</h4>
-                        <p className="text-xs text-slate-400">Try adjusting your search or source filters.</p>
+                        <p className="text-xs text-slate-400">No leads match your selected filters.</p>
                     </div>
                 ) : (
                     <Table>
-                        <TableHeader className="bg-slate-50/50">
+                        <TableHeader className="bg-slate-50/70">
                             <TableRow>
                                 <TableHead className="font-black uppercase tracking-widest text-[10px]">Customer</TableHead>
                                 <TableHead className="font-black uppercase tracking-widest text-[10px]">Target Listing / Source</TableHead>
                                 <TableHead className="font-black uppercase tracking-widest text-[10px]">Plan / Quota</TableHead>
                                 <TableHead className="font-black uppercase tracking-widest text-[10px]">Event Details & Message</TableHead>
-                                <TableHead className="font-black uppercase tracking-widest text-[10px]">Status</TableHead>
-                                <TableHead className="font-black uppercase tracking-widest text-[10px] text-right">Actions</TableHead>
+                                <TableHead className="font-black uppercase tracking-widest text-[10px]">Change Status</TableHead>
+                                <TableHead className="font-black uppercase tracking-widest text-[10px] text-right">Quick Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -272,61 +324,80 @@ export default function LeadsTab() {
                                                     Event: {format(new Date(lead.event_date), 'MMM dd, yyyy')}
                                                 </span>
                                             )}
-                                            <p className="text-xs text-slate-700 font-medium leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100 whitespace-pre-wrap">
+                                            <p className="text-xs text-slate-700 font-medium leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-wrap">
                                                 {lead.message || 'No additional details provided.'}
                                             </p>
                                         </div>
                                     </TableCell>
 
-                                    {/* Status */}
+                                    {/* Interactive Status Selector (Proper for ALL rows) */}
                                     <TableCell className="align-top py-4">
-                                        <Badge 
-                                            className={`text-[10px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded-lg border-none ${
-                                                lead.is_pending_approval ? 'bg-amber-100 text-amber-800' :
-                                                lead.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
-                                                lead.status === 'contacted' ? 'bg-blue-100 text-blue-800' :
-                                                lead.status === 'rejected' ? 'bg-rose-100 text-rose-800' :
-                                                'bg-slate-100 text-slate-700'
-                                            }`}
-                                        >
-                                            {lead.is_pending_approval ? 'Pending Approval' : lead.status}
-                                        </Badge>
+                                        <div className="relative inline-block w-40">
+                                            <select
+                                                value={lead.status}
+                                                disabled={updatingId === lead.id}
+                                                onChange={(e) => handleStatusChange(lead.id, e.target.value)}
+                                                className={`w-full appearance-none text-[11px] font-black uppercase tracking-wider py-1.5 pl-3 pr-7 rounded-xl border cursor-pointer focus:outline-none focus:ring-2 transition-all shadow-sm ${getStatusStyle(lead.status)}`}
+                                            >
+                                                <option value="pending">🟡 Pending</option>
+                                                <option value="new">🔵 New</option>
+                                                <option value="contacted">🟣 Contacted</option>
+                                                <option value="approved">🟢 Approved</option>
+                                                <option value="rejected">🔴 Rejected</option>
+                                            </select>
+                                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
+                                                <ChevronDown size={13} />
+                                            </div>
+                                        </div>
                                     </TableCell>
 
-                                    {/* Actions */}
+                                    {/* Unified Quick Actions */}
                                     <TableCell className="align-top py-4 text-right">
-                                        <div className="flex items-center justify-end gap-1.5">
-                                            {lead.is_pending_approval && (
-                                                <>
-                                                    <Button 
-                                                        size="sm" 
-                                                        onClick={() => handleApprove(lead)}
-                                                        className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-8 px-2.5 text-xs font-bold gap-1"
-                                                        title="Approve & Send to Lister"
-                                                    >
-                                                        <Check size={14} /> Approve
-                                                    </Button>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="outline"
-                                                        onClick={() => handleStatusChange(lead.id, 'rejected')}
-                                                        className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl h-8 px-2 text-xs"
-                                                        title="Reject Lead"
-                                                    >
-                                                        <X size={14} />
-                                                    </Button>
-                                                </>
+                                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                            {lead.status !== 'approved' && (
+                                                <Button 
+                                                    size="sm" 
+                                                    onClick={() => handleStatusChange(lead.id, 'approved')}
+                                                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-8 px-2.5 text-xs font-bold gap-1 shadow-sm"
+                                                    title="Approve & Send to Lister"
+                                                >
+                                                    <Check size={13} /> Approve
+                                                </Button>
                                             )}
-                                            {!lead.is_pending_approval && lead.status !== 'contacted' && (
+
+                                            {lead.status !== 'contacted' && lead.status !== 'approved' && (
                                                 <Button 
                                                     size="sm" 
                                                     variant="outline"
                                                     onClick={() => handleStatusChange(lead.id, 'contacted')}
-                                                    className="text-xs font-bold rounded-xl h-8 px-2.5 text-slate-600 hover:bg-slate-50"
+                                                    className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-xl h-8 px-2.5 text-xs font-bold gap-1"
+                                                    title="Mark Contacted"
                                                 >
-                                                    Mark Contacted
+                                                    <Phone size={11} /> Contacted
                                                 </Button>
                                             )}
+
+                                            {lead.status !== 'rejected' && (
+                                                <Button 
+                                                    size="sm" 
+                                                    variant="outline"
+                                                    onClick={() => handleStatusChange(lead.id, 'rejected')}
+                                                    className="text-rose-600 border-rose-100 hover:bg-rose-50 rounded-xl h-8 px-2 text-xs font-bold"
+                                                    title="Reject Lead"
+                                                >
+                                                    <X size={13} />
+                                                </Button>
+                                            )}
+
+                                            <Button 
+                                                size="sm" 
+                                                variant="ghost"
+                                                onClick={() => handleDelete(lead.id, lead.customer_name)}
+                                                className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl h-8 w-8 p-0"
+                                                title="Permanently Delete Lead"
+                                            >
+                                                <Trash2 size={13} />
+                                            </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
